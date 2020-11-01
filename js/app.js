@@ -7,11 +7,11 @@ let chosenPhrase = "";
 let missed = 0;
 
 const phrases = [
-    "javascript",
-    "html",
-    "java",
-    "css",
-    "python"
+    "blue bird",
+    "green frog",
+    "yellow lizard",
+    "tan lion",
+    "brown horse"
 ]
 
 //Creates an array of char from a randomly chosen string in an array of strings
@@ -30,6 +30,8 @@ function addPhraseToDisplay(array) {
         newLi.innerText = array[i];
         if (array[i] != " ") {
             newLi.className = "letter";
+        } else {
+            newLi.className = "space";
         }
         ul.appendChild(newLi);
     }
@@ -86,21 +88,24 @@ function resetGame() {
 // Checks chosen letter for match, keeps score, and checks for game end
 let playGame = function(e) {
     let letter = e.target.innerHTML;
-    e.target.disabled = "true";
-    let letterFound = checkLetter(letter);
-    if (!letterFound) {
-        missed++;
-        console.log(missed);
-        let nextHeart = document.querySelector('.tries');
-        nextHeart.className = 'fail';
-        nextHeart.firstElementChild.setAttribute('src', 'images/lostHeart.png');
-    }
-    let gameOver = checkWin();
-    if (gameOver) {
-        qwerty.removeEventListener('click', playGame);
-        resetGame();
-        start.onclick = wheelOfSuccess();
+    console.log(letter);
+    if (letter.length === 1) {
+        e.target.disabled = "true";
+        let letterFound = checkLetter(letter);
+        if (!letterFound) {
+            missed++;
+            console.log(missed);
+            let nextHeart = document.querySelector('.tries');
+            nextHeart.className = 'fail';
+            nextHeart.firstElementChild.setAttribute('src', 'images/lostHeart.png');
+        }
+        let gameOver = checkWin();
+        if (gameOver) {
+            qwerty.removeEventListener('click', playGame);
+            resetGame();
+            start.onclick = wheelOfSuccess();
 
+        }
     }
 }
 
