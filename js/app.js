@@ -1,31 +1,29 @@
 const qwerty = document.querySelector('#qwerty');
 const phrase = document.querySelector('#phrase');
 const ul = document.querySelector('#phrase ul');
-const start = document.querySelector('.btn__reset');
+let start = document.querySelector('.btn__reset');
+let chosenPhrase = "";
 
 let missed = 0;
 
 const phrases = [
-    "the quick",
-    "brown fox",
-    "jumped over",
-    "the lazy",
-    "dog"
+    "javascript",
+    "html",
+    "java",
+    "css",
+    "python"
 ]
-
-//Hide start overlay on 'Start Game' button click
-start.addEventListener('click', () => {
-    document.querySelector('#overlay').style.display = "none";
-});
 
 //Creates an array of char from a randomly chosen string in an array of strings
 function getRandomPhraseAsArray(array) {
     let random = Math.floor(Math.random() * (array.length));
-    let phraseArray = Array.from(array[random]);
+    chosenPhrase = array[random];
+    let phraseArray = Array.from(chosenPhrase);
+    console.log(phraseArray);
     return phraseArray;
 }
 
-//Loops through an array of characters and add them to display of game
+//Loops through an array of characters and adds them to display of game
 function addPhraseToDisplay(array) {
     for (let i=0; i<array.length; i++) {
         let newLi = document.createElement('li')
@@ -51,37 +49,75 @@ function checkLetter(button) {
     return match;
 }
 
-//Check for win or loss and display corresponding screen
+//Checks for win or loss and displays corresponding overlay screen
 function checkWin() {
     let letters = document.querySelectorAll('.letter');
     let shows = document.querySelectorAll('.show');
     let overlay = document.querySelector('#overlay');
-    if (letters.length === shows.length) {
-        overlay.firstElementChild.innerHTML = "Winner!!!";
-        overlay.className = "win";
-        setTimeout(function() {overlay.style.display = "flex"}, 2000);
-    }
-    if (missed === 5) {
-        overlay.firstElementChild.innerHTML = "Loser!!!";
-        overlay.className = "lose";
+    if (letters.length === shows.length || missed === 5) {
+        let status = (letters.length === shows.length) ? 'win' : 'lose';
+        overlay.firstElementChild.innerHTML = `The phrase was '${chosenPhrase}'. You ${status}!`;
+        overlay.className = status;
         overlay.style.display = "flex";
+        return true;
     }
 }
 
-//Display randomly chosen phrase's letters
-let x = getRandomPhraseAsArray(phrases);
-addPhraseToDisplay(x);
+//Set misses to zero and refresh hearts, changes button, enables all letters, and sets a new phrase
+function resetGame() {
+    start.innerHTML = "New Game";
+    let letters = document.querySelectorAll('.keyrow button');
+    for (let i=0; i<letters.length; i++) {
+        letters[i].removeAttribute("disabled");
+    }
+    ul.innerHTML = "";
+    missed = 0;
+    console.log(missed);
+    let hearts = document.querySelector('#scoreboard ol').children;
+    start.addEventListener('click', () => {
+        document.querySelector('#overlay').style.display = "none";
+    });;
+    for (let i=0; i<hearts.length; i++) {
+        hearts[i].className = "tries";
+        hearts[i].firstElementChild.setAttribute('src', 'images/liveHeart.png');
+    }
+}
 
-//Get selected letter and check for match in phrase, win, and loss
-qwerty.addEventListener('click', (e) => {
+// Checks chosen letter for match, keeps score, and checks for game end
+let playGame = function(e) {
     let letter = e.target.innerHTML;
     e.target.disabled = "true";
     let letterFound = checkLetter(letter);
     if (!letterFound) {
         missed++;
+        console.log(missed);
         let nextHeart = document.querySelector('.tries');
         nextHeart.className = 'fail';
         nextHeart.firstElementChild.setAttribute('src', 'images/lostHeart.png');
     }
-    checkWin();
-});
+    let gameOver = checkWin();
+    if (gameOver) {
+        qwerty.removeEventListener('click', playGame);
+        resetGame();
+        start.onclick = wheelOfSuccess();
+
+    }
+}
+
+//Starts and runs game
+function wheelOfSuccess() {
+    //Hide start overlay on 'Start Game' button click
+    start.addEventListener('click', () => {
+        document.querySelector('#overlay').style.display = "none";
+    });
+
+    //Display randomly chosen phrase's letters
+    let x = getRandomPhraseAsArray(phrases);
+    addPhraseToDisplay(x);
+
+    //Get selected letter and check for match in phrase, win, and loss
+    qwerty.addEventListener('click', playGame);
+}
+
+wheelOfSuccess();
+
